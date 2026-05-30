@@ -1,0 +1,24 @@
+# Runs every 10 minutes. Free on GitHub — no always-on server required.
+name: Keep services alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Ping all targets
+        run: npm run ping
+        env:
+          # Paste contents of config.json (minified) as repo secret
+          PING_TARGETS: ${{ secrets.PING_TARGETS }}

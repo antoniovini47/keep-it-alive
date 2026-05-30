@@ -1,0 +1,26 @@
+{
+  "targets": [
+    {
+      "name": "my-app-supabase",
+      "url": "https://YOUR_PROJECT_REF.supabase.co/auth/v1/health",
+      "method": "GET",
+      "headers": {
+        "apikey": "YOUR_SUPABASE_ANON_KEY"
+      }
+    },
+    {
+      "name": "my-app-rest",
+      "url": "https://YOUR_PROJECT_REF.supabase.co/rest/v1/",
+      "method": "GET",
+      "headers": {
+        "apikey": "YOUR_SUPABASE_ANON_KEY",
+        "Authorization": "Bearer YOUR_SUPABASE_ANON_KEY"
+      }
+    },
+    {
+      "name": "vercel-preview-api",
+      "url": "https://your-app.vercel.app/api/health",
+      "method": "GET"
+    }
+  ]
+}

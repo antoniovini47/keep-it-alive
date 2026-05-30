@@ -1,0 +1,14 @@
+{
+  "name": "keep-it-alive",
+  "version": "1.0.0",
+  "description": "Ping any URLs on a schedule to prevent pause",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "ping": "node src/ping.mjs",
+    "start": "node src/server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
