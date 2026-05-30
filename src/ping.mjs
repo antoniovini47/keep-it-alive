@@ -1,30 +1,9 @@
 /**
  * Pings all configured targets and logs results.
- * Config: PING_TARGETS env (JSON) or config.json in project root.
+ * Config: REPO_SECRET env (full config.json) or config.json in project root.
  */
 
-import { readFileSync, existsSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = join(__dirname, "..");
-
-function loadTargets() {
-  if (process.env.PING_TARGETS) {
-    return JSON.parse(process.env.PING_TARGETS);
-  }
-
-  const configPath = join(root, "config.json");
-  if (existsSync(configPath)) {
-    const raw = JSON.parse(readFileSync(configPath, "utf8"));
-    return raw.targets ?? raw;
-  }
-
-  throw new Error(
-    "No targets found. Copy config.example.json to config.json or set PING_TARGETS."
-  );
-}
+import { loadConfig } from "./config.mjs";
 
 async function pingOne(target) {
   const { name, url, method = "GET", headers = {}, body } = target;
@@ -50,7 +29,7 @@ async function pingOne(target) {
 }
 
 async function main() {
-  const targets = loadTargets();
+  const { targets } = loadConfig();
 
   if (!Array.isArray(targets) || targets.length === 0) {
     throw new Error("targets must be a non-empty array");

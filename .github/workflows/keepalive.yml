@@ -1,4 +1,5 @@
-# Runs every 10 minutes. Free on GitHub — no always-on server required.
+# Ping interval is controlled here — edit the cron expression to change frequency.
+# GitHub minimum is once every 5 minutes (e.g. "*/5 * * * *").
 name: Keep services alive
 
 on:
@@ -20,5 +21,4 @@ jobs:
       - name: Ping all targets
         run: npm run ping
         env:
-          # Paste contents of config.json (minified) as repo secret
-          PING_TARGETS: ${{ secrets.PING_TARGETS }}
+          REPO_SECRET: ${{ secrets.REPO_SECRET }}

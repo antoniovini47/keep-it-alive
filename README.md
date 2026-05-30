@@ -1,6 +1,6 @@
 # Keep it Alive!!!
 
-Pings your projects (and other URLs) every **10 minutes** so free-tier services stay active.
+Pings your projects (and other URLs) on a schedule so free-tier services stay active.
 
 ## Recommended: GitHub Actions (free, reliable)
 
@@ -11,17 +11,41 @@ GitHub runs the job on a schedule — no server that can sleep on you.
 1. Create a new GitHub repo and push this folder.
 2. Copy `config.example.json` → `config.json` and add your projects (see below).
 3. In the repo: **Settings → Secrets and variables → Actions → New repository secret**
-   - Name: `PING_TARGETS`
-   - Value: the **entire** `targets` array from `config.json`, as one line of JSON, for example:
+   - Name: `REPO_SECRET`
+   - Value: open your local `config.json`, **select all**, copy, and paste the **entire file** — no minifying, no editing. Pretty-printed JSON with line breaks is fine.
 
-```json
-[{"name":"project-a","url":"https://abc.supabase.co/auth/v1/health","method":"GET","headers":{"apikey":"eyJ..."}}]
-```
+   ```json
+   {
+     "targets": [ ... ]
+   }
+   ```
 
 4. Push `.github/workflows/keepalive.yml` — workflows run automatically on the default branch.
+
 5. **Actions** tab → open **Keep services alive** → **Run workflow** once to test.
 
 GitHub may delay the first scheduled run by a few minutes; `workflow_dispatch` is for manual tests.
+
+### Ping interval
+
+The schedule lives in **`.github/workflows/keepalive.yml`**, not in `config.json`. Edit the `cron` line to change how often targets are pinged:
+
+```yaml
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # every 10 minutes (default)
+```
+
+Examples (UTC):
+
+| Cron | Frequency |
+|------|-----------|
+| `*/5 * * * *` | Every 5 minutes (GitHub minimum) |
+| `*/10 * * * *` | Every 10 minutes |
+| `*/15 * * * *` | Every 15 minutes |
+| `0 * * * *` | Once per hour |
+
+GitHub uses **UTC** for cron. Scheduled runs can drift a few minutes under load — normal for free-tier Actions.
 
 ### What to ping for Supabase
 
@@ -30,7 +54,7 @@ GitHub may delay the first scheduled run by a few minutes; `workflow_dispatch` i
 | `https://<ref>.supabase.co/auth/v1/health` | Lightweight auth health check |
 | `https://<ref>.supabase.co/rest/v1/` | Touches PostgREST (DB/API path) |
 
-Use your project **anon** key in `apikey` and `Authorization: Bearer <anon>` for REST. Keys in GitHub Secrets are not exposed in logs when used as `secrets.PING_TARGETS`.
+Use your project **anon** key in `apikey` and `Authorization: Bearer <anon>` for REST. Keys in GitHub Secrets are not exposed in logs when used as `REPO_SECRET`.
 
 Also ping your **frontend/API** URLs (Vercel, Netlify, etc.) if those free tiers pause too.
 
@@ -49,10 +73,16 @@ npm run ping
 ## Optional: always-on server
 
 ```bash
-PING_INTERVAL_MINUTES=10 PING_TARGETS='[...]' npm start
+npm start
 ```
 
-Deploy to Render/Railway/Fly with `npm start` and env `PING_TARGETS` or mount `config.json`.
+Pings every **10 minutes** by default. Override with env:
+
+```bash
+PING_INTERVAL_SECONDS=300 npm start
+```
+
+Deploy to Render/Railway/Fly with `npm start` and env `REPO_SECRET` (paste full `config.json`) or mount `config.json`.
 
 **Caveat:** many free web hosts **sleep** when idle, so internal `setInterval` may not fire. GitHub Actions avoids that.
 
@@ -66,6 +96,18 @@ Deploy to Render/Railway/Fly with `npm start` and env `PING_TARGETS` or mount `c
 ---
 
 ## Config reference
+
+Top-level shape:
+
+```json
+{
+  "targets": [ ... ]
+}
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `targets` | yes | Array of URLs to ping (see below). |
 
 Each target:
 
